@@ -5,7 +5,7 @@ const commentSchema = new Schema(
     {
         user:       { type: Types.ObjectId, ref: "User", required: true },
         user_name:  { type: String, required: true, trim: true },
-        user_email: { type: String, default: "", trim: true, lowercase: true },
+        user_email: { type: String, trim: true, lowercase: true },
         text:       { type: String, required: true, trim: true },
         created_at: { type: Date, default: Date.now },
     },
@@ -22,23 +22,22 @@ const postSchema = new Schema(
         user_email: { type: String, required: true, lowercase: true, trim: true },
         user_name:  { type: String, required: true, trim: true },
 
-        // likes: user _id sąrašas
-        likes: { type: [{ type: Types.ObjectId, ref: "User" }], default: [] },
+        // Likes
+        likes:    { type: [{ type: Types.ObjectId, ref: "User" }], default: [] },
 
-        // comments: sub-docs
+        // Comments
         comments: { type: [commentSchema], default: [] },
     },
     { timestamps: true }
 );
 
-// gražus JSON
 postSchema.set("toJSON", {
     versionKey: false,
     transform(doc, ret) {
         ret.id = String(ret._id);
         delete ret._id;
 
-        // created_at išlaikymas
+        // created_at iš bet kur
         let ts = ret.createdAt || ret.created_at;
         if (!ts && doc && doc._id && typeof doc._id.getTimestamp === "function") {
             ts = doc._id.getTimestamp();
