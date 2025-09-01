@@ -2,76 +2,63 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
-const path = require("path");
-
-// .env užkraunam kuo anksčiau, prieš skaitant process.env
-require("dotenv").config({ path: path.resolve(process.cwd(), ".env") });
+try { require("dotenv").config(); } catch (_) {}
 
 const app = express();
+const PORT = process.env.PORT || 2500;
 
-/* ---------- helpers ---------- */
-function requireEnv(name) {
-    const v = process.env[name];
-    if (!v || String(v).trim() === "") {
-        console.error(`[ENV] Missing required variable: ${name}`);
-        process.exit(1);
-    }
-    return v;
-}
-function maskJwt(jwt) {
-    if (!jwt) return "(empty)";
-    return `${jwt.slice(0, 6)}…${jwt.slice(-4)}`;
-}
-function maskMongo(uri) {
+// ---- Helpers: saugiai išparsinti CORS_ORIGIN ----
+function parseCors(originEnv) {
+    if (!originEnv) return [];
+    // 1) bandome kaip JSON
     try {
-        const u = new URL(uri);
-        // paslepiam user:pass
-        if (u.password) u.password = "***";
-        if (u.username) u.username = "***";
-        // grąžinam tik host/db dalį
-        return `${u.protocol}//${u.host}${u.pathname}`;
-    } catch {
-        return "(invalid MONGO_URI)";
-    }
+        const parsed = JSON.parse(originEnv);
+        if (Array.isArray(parsed)) return parsed;
+        if (typeof parsed === "string") return [parsed];
+    } catch (_) {}
+    // 2) bandome kaip kableliais/skyrimais atskirtą sąrašą arba vieną URL
+    return String(originEnv)
+        .split(/[,\s]+/)
+        .map((s) => s.trim())
+        .filter(Boolean);
 }
 
-/* ---------- env ---------- */
-const PORT = Number(process.env.PORT || 2500);
-const JWT_SECRET = requireEnv("JWT_SECRET");
-const MONGO_URI = requireEnv("MONGO_URI");
-const CORS_ORIGIN = process.env.CORS_ORIGIN
-    ? process.env.CORS_ORIGIN.split(",").map((s) => s.trim())
-    : true; // true = leisti viską dev režime
+// ---- ENV logai (be slaptų duomenų nutekinimo) ----
+const JWT_SECRET_PREVIEW = (process.env.JWT_SECRET || "");
+const MONGO_URI_SAFE = (process.env.MONGO_URI || "").replace(/:\/\/([^@]+)@/, "://***:***@");
+const CORS_LIST = parseCors(process.env.CORS_ORIGIN);
 
 console.log("[ENV] PORT =", PORT);
-console.log("[ENV] JWT_SECRET =", maskJwt(JWT_SECRET));
-console.log("[ENV] MONGO_URI =", maskMongo(MONGO_URI));
-console.log("[ENV] CORS_ORIGIN =", CORS_ORIGIN);
+console.log("[ENV] JWT_SECRET =", JWT_SECRET_PREVIEW ? JWT_SECRET_PREVIEW.slice(0, 6) + "…" + JWT_SECRET_PREVIEW.slice(-4) : "(missing)");
+console.log("[ENV] MONGO_URI =", MONGO_URI_SAFE || "(missing)");
+console.log("[ENV] CORS_ORIGIN =", CORS_LIST.length ? CORS_LIST : "*");
 
-/* ---------- db ---------- */
+// ---- DB ----
+const MONGO_URI =
+    process.env.MONGO_URI ||
+    "mongodb+srv://cluster.irubfmr.mongodb.net/blog";
+
 mongoose
     .connect(MONGO_URI, { serverSelectionTimeoutMS: 10000 })
     .then(() => console.log("[MongoDB] Database Connected!"))
-    .catch((err) => {
-        console.error("[MongoDB] Connection error:", err?.message || err);
-        process.exit(1);
-    });
+    .catch((err) => console.error("[MongoDB] Connection error:", err));
 
-/* ---------- middleware ---------- */
+// ---- Middleware ----
 app.use(
-    cors({
-        origin: CORS_ORIGIN,
-        credentials: true,
-    })
+    cors(
+        CORS_LIST.length
+            ? { origin: CORS_LIST, credentials: true }
+            : {} // be parametrų – leidžia viską (dev)
+    )
 );
+
 app.use(express.json());
 
-// --- request/response logger (be slaptažodžių nutekinimo)
+// --- Išsamus loggeris (be paslapčių) ---
 app.use((req, res, next) => {
     const t0 = Date.now();
 
-    let body =
-        req.method === "GET" ? undefined : { ...(req.body || {}) };
+    let body = req.method === "GET" ? undefined : { ...(req.body || {}) };
     ["password", "passwordOne", "passwordTwo"].forEach((k) => {
         if (body && Object.prototype.hasOwnProperty.call(body, k)) body[k] = "***";
     });
@@ -94,9 +81,10 @@ app.use((req, res, next) => {
     next();
 });
 
-/* ---------- routes ---------- */
+// Sveikatos patikra
 app.get("/health", (_req, res) => res.json({ ok: true, scope: "root" }));
 
+// (paliekam žmonių generatorių, jei dar naudoji)
 const { generatePerson } = require("./modules/personGenerate");
 app.get("/generatePerson/:amount", (req, res) => {
     const amount = parseInt(req.params.amount, 10);
@@ -107,11 +95,15 @@ app.get("/generatePerson/:amount", (req, res) => {
     res.json({ ok: true, count: users.length, users });
 });
 
+// BLOG api per router + alias
 const blogRouter = require("./routers/blogRouter");
 app.use("/api/blog", blogRouter);
 app.use("/backreg", blogRouter);
 
-/* ---------- start ---------- */
+// Start
+console.log("[ENV] JWT_SECRET set:", !!process.env.JWT_SECRET);
+console.log("[ENV] MONGO_URI set:", !!process.env.MONGO_URI);
+
 app.listen(PORT, () => {
     console.log("Serveris paleistas:  http://localhost:" + PORT);
     console.log("Root health:         http://localhost:" + PORT + "/health");

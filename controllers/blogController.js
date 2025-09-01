@@ -5,20 +5,18 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const Post = require("../models/Post");
 
-// bcrypt su fallback į bcryptjs
+// bcrypt su fallback
 let bcrypt;
-try { bcrypt = require("bcrypt"); }
-catch { bcrypt = require("bcryptjs"); }
+try { bcrypt = require("bcrypt"); } catch { bcrypt = require("bcryptjs"); }
 
 const SALT_ROUNDS = Number(process.env.SALT_ROUNDS || 10);
 
-// helperis
+// utils
 const makeSecret = () =>
     (crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString("hex"));
 
 function normalizePost(p) {
     const raw = typeof p.toJSON === "function" ? p.toJSON() : p;
-
     raw.id = String(raw.id || raw._id || "");
     delete raw._id;
 
@@ -32,14 +30,11 @@ function normalizePost(p) {
     delete raw.updatedAt;
     delete raw.__v;
 
-    // likes / comments metrika
     raw.likes_count    = Array.isArray(raw.likes)    ? raw.likes.length    : 0;
     raw.comments_count = Array.isArray(raw.comments) ? raw.comments.length : 0;
-
     return raw;
 }
 
-// papildomai – jei yra reqUser, pažymim is_liked
 function toClientPost(p, reqUser) {
     const out = normalizePost(p);
     if (reqUser && Array.isArray(out.likes)) {
@@ -48,17 +43,13 @@ function toClientPost(p, reqUser) {
     return out;
 }
 
-//JWT helperiai
-function maskToken(t) {
-    if (!t || typeof t !== "string") return "";
-    return t.slice(0, 12) + "...";
-}
+function maskToken(t) { return (!t || typeof t !== "string") ? "" : t.slice(0, 12) + "..."; }
 
 function signToken(user) {
     const payload = {
         id: String(user._id),
         email: user.email,
-        userName: user.userName || user.username, // dėl senos bazės
+        userName: user.userName || user.username,
     };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "7d" });
     console.log(`[JWT] issued token for user=${payload.id} (${payload.email}) token=${maskToken(token)}`);
@@ -68,21 +59,12 @@ function signToken(user) {
 async function getUserFromToken(req) {
     try {
         const hdr = req.headers.authorization || req.headers.Authorization || "";
-        if (!hdr.startsWith("Bearer ")) {
-            return null; // GET /posts gali būt be auth
-        }
+        if (!hdr.startsWith("Bearer ")) return null;
         const raw = hdr.slice(7);
         let decoded;
-        try {
-            decoded = jwt.verify(raw, process.env.JWT_SECRET);
-        } catch (e) {
-            console.warn(`[JWT] verify failed: ${e.name} ${e.message}`);
-            return null;
-        }
-        if (!decoded?.id) {
-            console.warn("[JWT] decoded but no id in payload");
-            return null;
-        }
+        try { decoded = jwt.verify(raw, process.env.JWT_SECRET); }
+        catch (e) { console.warn(`[JWT] verify failed: ${e.name} ${e.message}`); return null; }
+        if (!decoded?.id) return null;
         const u = await User.findById(decoded.id);
         if (u) console.log(`[JWT] verified user=${decoded.id} email=${decoded.email} token=${maskToken(raw)}`);
         return u || null;
@@ -95,25 +77,17 @@ async function getUserFromToken(req) {
 module.exports = {
     health: (_req, res) => res.json({ ok: true, scope: "blog" }),
 
-    // POST /api/blog/register
+    // --- AUTH ---
     register: async (req, res) => {
         try {
             const email = String(req.body?.email || "").trim().toLowerCase();
             const p1 = String(req.body?.passwordOne || "");
             const p2 = String(req.body?.passwordTwo || "");
 
-            if (!validator.validate(email)) {
-                return res.json({ success: false, message: "bad email" });
-            }
-            if (!p1 || !p2) {
-                return res.json({ success: false, message: "missing passwords" });
-            }
-            if (p1 !== p2) {
-                return res.json({ success: false, message: "passwords do not match" });
-            }
-            if (await User.exists({ email })) {
-                return res.json({ success: false, message: "email already exists" });
-            }
+            if (!validator.validate(email)) return res.json({ success: false, message: "bad email" });
+            if (!p1 || !p2) return res.json({ success: false, message: "missing passwords" });
+            if (p1 !== p2) return res.json({ success: false, message: "passwords do not match" });
+            if (await User.exists({ email })) return res.json({ success: false, message: "email already exists" });
 
             const base = email.split("@")[0];
             let userName = base.toLowerCase().replace(/\s+/g, "-");
@@ -132,9 +106,8 @@ module.exports = {
                 secret: makeSecret(),
             });
 
-            // išduodam JWT iškart
             const token = signToken(user);
-            console.log(`[AUTH] register OK user=${user._id} email=${user.email} token=${maskToken(token)}`);
+            console.log(`[AUTH] register OK user=${user._id} email=${user.email}`);
 
             return res.json({
                 success: true,
@@ -147,7 +120,6 @@ module.exports = {
         }
     },
 
-    // POST /api/blog/login
     login: async (req, res) => {
         try {
             const identifier = String(req.body?.email || "").trim().toLowerCase();
@@ -156,31 +128,22 @@ module.exports = {
 
             const user = await User.findOne({
                 $or: [{ email: identifier }, { userName: identifier }, { username: identifier }],
-            })
-                .select("+password +passwordHash")
-                .lean();
+            }).select("+password +passwordHash").lean();
 
-            if (!user) {
-                console.log("[AUTH] user not found");
-                return res.json({ success: false, message: "bad credentials" });
-            }
+            if (!user) return res.json({ success: false, message: "bad credentials" });
 
             let ok = false;
             if (user.passwordHash) {
                 ok = await bcrypt.compare(password, user.passwordHash);
             } else if (user.password) {
-                ok = user.password === password; // legacy plaintext
+                ok = user.password === password;
                 if (ok) {
                     const newHash = await bcrypt.hash(password, SALT_ROUNDS);
                     await User.updateOne({ _id: user._id }, { $set: { passwordHash: newHash }, $unset: { password: 1 } });
                     console.log("[AUTH] migrated legacy password -> passwordHash");
                 }
             }
-
-            if (!ok) {
-                console.log("[AUTH] bad password");
-                return res.json({ success: false, message: "bad credentials" });
-            }
+            if (!ok) return res.json({ success: false, message: "bad credentials" });
 
             const token = signToken(user);
             console.log(`[AUTH] login OK user=${user._id} email=${user.email}`);
@@ -201,21 +164,42 @@ module.exports = {
         }
     },
 
-    // GET /api/blog/posts?order=desc|asc
+    // --- USERS LIST (NAUJA) ---
+    listUsers: async (_req, res) => {
+        try {
+            console.log("[USERS] list all");
+            const users = await User.find({})
+                .select("userName username email phone city avatar createdAt created_at")
+                .lean();
+
+            const out = users.map(u => ({
+                id: String(u._id),
+                username: u.userName || u.username || (u.email ? String(u.email).split("@")[0] : "user"),
+                email: u.email || "",
+                phone: u.phone || "",
+                city: u.city || "",
+                avatar: u.avatar || "",
+                created_at: (u.created_at || u.createdAt) ? new Date(u.created_at || u.createdAt).toISOString() : null,
+            }));
+
+            return res.json({ success: true, count: out.length, users: out });
+        } catch (err) {
+            console.error("[USERS] list error:", err);
+            return res.status(500).json({ success: false, message: "server error" });
+        }
+    },
+
+    // --- POSTS ---
     listPosts: async (req, res) => {
         try {
             const order = String(req.query.order || "desc").toLowerCase() === "asc" ? 1 : -1;
-
             const q = {};
-            if (req.query.user_id)   q.user = req.query.user_id;
+            if (req.query.user_id) q.user = req.query.user_id;
             if (req.query.user_name) q.user_name = String(req.query.user_name).toLowerCase();
 
-            // jei yra token, naudokim is_liked
             const u = await getUserFromToken(req);
-
             const docs = await Post.find(q).sort({ createdAt: order, _id: order }).lean();
             const posts = docs.map((d) => toClientPost(d, u));
-
             return res.json({ success: true, order: order === 1 ? "asc" : "desc", count: posts.length, posts });
         } catch (err) {
             console.error("[BLOG] listPosts error:", err);
@@ -223,19 +207,14 @@ module.exports = {
         }
     },
 
-    // POST /api/blog/posts
     createPost: async (req, res) => {
         try {
-            const user = req.user; // iš requireAuth
+            const user = req.user;
             const { title, image_url, description } = req.body;
-
-            const displayName =
-                user.userName || user.username || (user.email ? String(user.email).split("@")[0] : "user");
+            const displayName = user.userName || user.username || (user.email ? String(user.email).split("@")[0] : "user");
 
             const created = await Post.create({
-                title,
-                image_url,
-                description,
+                title, image_url, description,
                 user: user._id,
                 user_email: user.email,
                 user_name: displayName,
@@ -249,17 +228,12 @@ module.exports = {
         }
     },
 
-    // PUT /api/blog/posts/:id
     updatePost: async (req, res) => {
         try {
-            const set = req.updateSet; // iš validatePostUpdate
+            const set = req.updateSet;
             const id = String(req.params.id);
-
             const updated = await Post.findByIdAndUpdate(id, { $set: set }, { new: true, runValidators: true });
-            if (!updated) {
-                return res.status(404).json({ success: false, message: "not found" });
-            }
-
+            if (!updated) return res.status(404).json({ success: false, message: "not found" });
             console.log(`[POST] updated id=${id} by user=${req.user._id}`);
             return res.json({ success: true, post: toClientPost(updated, req.user), message: "post updated" });
         } catch (err) {
@@ -268,7 +242,6 @@ module.exports = {
         }
     },
 
-    // DELETE /api/blog/posts/:id
     deletePost: async (req, res) => {
         try {
             const id = String(req.params.id);
@@ -282,8 +255,6 @@ module.exports = {
     },
 
     // --- LIKES ---
-
-    // POST /api/blog/posts/:id/like
     likePost: async (req, res) => {
         try {
             const id = String(req.params.id);
@@ -297,8 +268,14 @@ module.exports = {
                 { $addToSet: { likes: req.user._id } },
                 { new: true, strict: false }
             );
-
             if (!updated) return res.status(404).json({ success: false, message: "post not found" });
+
+            // taip pat registruojam user'yje (jei nėra schema, veiks dėl strict:false)
+            await User.updateOne(
+                { _id: req.user._id },
+                { $addToSet: { likes: updated._id } },
+                { strict: false }
+            );
 
             const out = toClientPost(updated, req.user);
             console.log(`[LIKE] ok post=${id} likes_count=${out.likes_count}`);
@@ -309,7 +286,6 @@ module.exports = {
         }
     },
 
-    // DELETE /api/blog/posts/:id/like
     unlikePost: async (req, res) => {
         try {
             const id = String(req.params.id);
@@ -323,8 +299,13 @@ module.exports = {
                 { $pull: { likes: req.user._id } },
                 { new: true, strict: false }
             );
-
             if (!updated) return res.status(404).json({ success: false, message: "post not found" });
+
+            await User.updateOne(
+                { _id: req.user._id },
+                { $pull: { likes: updated._id } },
+                { strict: false }
+            );
 
             const out = toClientPost(updated, req.user);
             console.log(`[UNLIKE] ok post=${id} likes_count=${out.likes_count}`);
@@ -335,7 +316,6 @@ module.exports = {
         }
     },
 
-    // GET /api/blog/posts/:id/likes
     getLikes: async (req, res) => {
         try {
             const id = String(req.params.id);
@@ -366,8 +346,6 @@ module.exports = {
     },
 
     // --- COMMENTS ---
-
-    // GET /api/blog/posts/:id/comments
     getComments: async (req, res) => {
         try {
             const id = String(req.params.id);
@@ -394,7 +372,6 @@ module.exports = {
         }
     },
 
-    // POST /api/blog/posts/:id/comments (requireAuth)
     addComment: async (req, res) => {
         try {
             const id = String(req.params.id);
