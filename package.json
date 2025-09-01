@@ -1,10 +1,33 @@
 {
-  "name": "${PROJECT_NAME}",
+  "name": "nodejs",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "node js Blog api",
+  "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "dev": "nodemon app.js"
   },
-  "private": true
+  "private": true,
+  "keywords": [
+    "nodejs"
+  ],
+  "author": "Oskaras Jankauskas",
+  "license": "ISC",
+  "dependencies": {
+    "@faker-js/faker": "^9.9.0",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "email-validator": "^2.0.4",
+    "express": "^5.1.0",
+    "faker": "^6.6.6",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.18.0",
+    "random-animal-name": "^0.1.1",
+    "uid": "^2.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  }
 }

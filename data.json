@@ -1,0 +1,80 @@
+{
+  "users": [
+    {
+      "email": "banditaz@gmail.com",
+      "password": "Banditaz1",
+      "secret": "31a33504-11f6-404f-91be-a65017fe2ee3",
+      "userName": "banditaz",
+      "created_at": "2025-08-22T08:19:32.265Z"
+    },
+    {
+      "email": "zarinas@gmail.com",
+      "password": "Zarinas1",
+      "secret": "19cfa782-39ab-4a18-b95b-b7c1a8d1128f",
+      "userName": "zarinas",
+      "created_at": "2025-08-22T08:20:03.657Z"
+    },
+    {
+      "email": "master@oskaraz.lt",
+      "password": "Master1",
+      "secret": "e7dea838-d4e8-4486-b14a-85bc27f97cde",
+      "userName": "master",
+      "created_at": "2025-08-22T08:20:39.930Z"
+    },
+    {
+      "email": "oskaraz@oskaraz.lt",
+      "password": "Oskaraz1",
+      "secret": "323d5bb5-2345-48f1-b1ec-bfb5cd8501e4",
+      "userName": "oskaraz",
+      "created_at": "2025-08-22T08:22:58.529Z"
+    }
+  ],
+  "posts": [
+    {
+      "id": "1bc1c339-5d15-467d-9fa0-3b4f7569bafd",
+      "title": "Linksmybės šiaurėje",
+      "image_url": "https://i.natgeofe.com/n/75180621-67aa-43fc-8b81-33b490c96413/71100.jpg",
+      "description": "Nors per šių metų šventes skaičiuojame rekordinius karščius ir sniego greičiausiai nesulauksime nė kruopelytės, šios baltosios meškos juo gali džiaugtis į valias. San Diego zoologijos sode užfiksuotas linksmas vaizdelis, kuriame – smagiai sniege linksminasi baltosios meškos. Specialiai joms buvo išpiltą net 26 tonos sniego.",
+      "user_email": "oskaraz@oskaraz.lt",
+      "user_name": "oskaraz",
+      "created_at": "2025-08-22T08:24:30.217Z"
+    },
+    {
+      "id": "6f3b2b78-ba7f-407e-adc4-2fa6336751a6",
+      "title": "Baravykai",
+      "image_url": "https://www.girios.lt/uploads/Products/product_10/baravykas_1579096986.jpg",
+      "description": "Nors pilna pintinė grybų – kiekvieno grybautojo svajonė, ne kiekvienas pasivaikščiojimas miške būna toks sėkmingas. Kur kas lengviau, kai tiksliai žinome, kur jų ieškoti, o dar geriau, jei grybus patys pasisėjame sau pažįstamoje vietoje. Norintiems užsiauginti savo baravykų, raudonviršių ar voveraičių, svarbiausia žinoti, kokių medžių kaimynystė reikalinga skirtingiems grybams, tačiau nereikėtų tikėtis, kad grybai pasirodys jau pirmais metais.\nSodyboje ar miške patiems galima užsiauginti pačių įvairiausių grybų, o esminė daugumai jų būtina sąlyga – augti medžių kaimynystėje. Kaip teigia Gamtos tyrimų centro Botaniko instituto Mikologijos laboratorijos mokslo darbuotojas, daktaras Jonas Kasparavičius, vienus grybus užsiauginti galima paprasčiau ir greičiau, o kitais atvejais gali tekti gerokai paplušėti ir rezultatas gali neatpirkti įdėtų pastangų.",
+      "user_email": "oskaraz@oskaraz.lt",
+      "user_name": "oskaraz",
+      "created_at": "2025-08-22T08:25:18.168Z"
+    },
+    {
+      "id": "d0e2b0c6-9616-4e12-ac56-a108fcaedff7",
+      "title": "Sugriovus taborą narkotikai pasklido po miestą",
+      "image_url": "https://s1.15min.lt/static/cache/OTcweDU4MCwxMjY0eDQ2NCw2MjU3OTksb3JpZ2luYWwsLGlkPTI5MjI5NTgmZGF0ZT0yMDE3JTJGMDQlMkYwMSwzMjQyMTgyODkx/policijos-reidas-vilniaus-naktiniame-bare-ieskant-narkotiku-58df0265a3b90.jpg",
+      "description": "Markučiai. Veiksmas dažniausiai vyksta Pakraščio g. esančioje namų teritorijoje, kur daugiausia gyvena romų tautybės žmonės. Pasak vienos gyventojos, sugriovus taborą 2021 m., čia buvo atkraustytos 4 šeimos, tada, jos teigimu, ir prasidėjo problemos su narkotikų prekyba ir vartojimu rajone.\nPlėšimų banga Naujininkus užtvindė dar 2021-aisiais, bet policija niekaip nepripažino, kad visas rajonas virto karštuoju tašku. Buvo jis toks ir dar anksčiau, kai griaunant taboro lūšnas narkotikų prekyba pamažu persikėlė prie Naujininkų transporto žiedo. Tačiau supratę, kad policija į tai žiūri pro pirštus, įžūlūs prekeiviai persikėlė prie prekybos centro. Lygiai taip pat policija nenorėjo pripažinti, kad narkotikų prekeiviai ir narkomanai buvo įsikūrę ištisą stovyklą ties geležinkelio bėgiais Dariaus ir Girėno gatvės įmonių rajone. Tol, kol neapsikentę įmonių darbuotojai nepradėjo filmuoti to, kas vykdavo kiekvieną dieną po biurų langais. Tad vienintelė pareigūnų pripažinta narkotikų prekyvietė lieka taboras, kurio jau nebėra. Visos kitos vietos, kuriose vyksta ne tik kvaišalų prekyba, bet ir plėšimai, vagystės, jiems – tik atskiri, tarpusavyje nesusiję atvejai. Baimė pasakyti, kad taboro bėdos išplito po visą miestą ar tiesiog nenoras kištis į purviną nusikalstamą verslą?",
+      "user_email": "oskaraz@oskaraz.lt",
+      "user_name": "oskaraz",
+      "created_at": "2025-08-22T08:28:10.328Z"
+    },
+    {
+      "id": "86a37f5d-784d-47c9-995a-db2d2950a8d2",
+      "title": "Vilnius tampa žinomas ir kaip siaubūno gimtinė",
+      "image_url": "https://images.delfi.lt/media-api-image-cropper/v1/e8dfb910-ab9b-11ed-8685-7b4ad97a4ffb.jpg?w=1200&h=800&fx=0.5&fy=0.25",
+      "description": "Vienas baisiausių šiuolaikinės pasaulio literatūros personažų – žmogėdra psichiatras Hanibalas Lekteris, šimtams milijonų žiūrovų įsiminęs po filmo „Avinėlių tylėjimas“, – autoriaus valia yra paskelbtas lietuviu. Pastaruoju metu net atsiranda žmonių, norinčių turistus vilioti į Lietuvą kaip į pagarsėjusio žmogėdros gimtinę.\nKokių pasekmių tai gali turėti mūsų šalies įvaizdžiui? Kodėl Lietuva pasaulio literatūroje vis dažniau paminima kaip mistinio blogio šalis? Kaip atsiranda tokie keisti lietuvių suvokimai? Atsakymų į tokius klausimus „Lietuvos ryto“ žurnalistė pabandė ieškoti kalbėdamasi su mokslininkais, žmonėmis, susijusiais su valstybės įvaizdžio formavimu, turizmo verslu, svečių iš užsienio priėmimu. Dabar Lietuvos kino teatruose rodomas naujausias, trečiasis, filmas „Raudonasis drakonas“, kuriame aktorius Anthony Hopkinsas vaidina žmogėdrą intelektualą. Užpernai, po antrojo filmo „Hanibalas“, jo pagrindinis veikėjas JAV buvo išrinktas didžiausiu piktadariu pasaulio kine. Tačiau abu šie filmai nė iš tolo neprilygo 1991-aisiais penkis „Oskarus“ pelniusio „Avinėlių tylėjimo“ šlovei. Visi filmai sukurti pagal Thomo Harrio trilogiją apie Hanibalą Lekterį – vieną baisiausių žmogžudžių šiuolaikinėje literatūroje.\n1999-aisiais išleistoje knygoje „Hanibalas“ autorius šiam personažui suteikė tautybę bei biografiją. Atidesni filmo „Hanibalas“ žiūrovai tai irgi galėjo pastebėti. Ten parodomas FTB bylos, skirtos Hanibalui Lekteriui, viršelis, kuriame matome keturias eilutes: gimimo data – 1938-ieji, gimimo vieta nežinoma, spėjama gimimo vieta – Lietuva. Knygoje „Hanibalas“ pagrindinis veikėjas skrenda iš Florencijos į JAV. Lėktuve užkandęs savo atsinešto maisto, jis susapnuoja košmarą apie vaikystę. Sapne 6 metų Hanibalas gyvena su tėvais ir jaunesniąja sesute Miša šeimos dvare prie Vilniaus. Jo tėvas – lietuvis kunigaikštis, o motina turi itališko kraujo arba yra italė. Tarp jos protėvių – garsios aristokratų Visconti, Machiavelli, Giuliano šeimos. Redaguota",
+      "user_email": "zarinas@gmail.com",
+      "user_name": "zarinas",
+      "created_at": "2025-08-22T08:30:35.623Z",
+      "updated_at": "2025-08-22T08:31:10.021Z"
+    },
+    {
+      "id": "bed9c28d-75a0-463d-a744-776ee6ca0113",
+      "title": "Pijonieriai , Pijonieriai",
+      "image_url": "https://static2.inspektorius.lt/usi/755x416/3/b9/25/12/b92512a68d1b1af6f45a3ea960705070.jpg?v=4.2.7.15&t=cr&s=755x416&m=3&f=/Uploads/UArticles/leadPhotos/09/75/52/0c/0975520c8b0cc557a72df896e6509961.jpg",
+      "description": "2 July 1985 - Columbia Records released Freddie Mercury’s “Living On My Own” as a single, with “She Blows Hot And Cold” on the B-side in the USA 🇺🇸 \n“If you listen to my song ‘Living On My Own’, that is very me. It’s living on my own, but having fun. There’s a bit in the middle where I do my scat singing and I’m just saying that when you think about somebody like me, my lifestyle, I have to go around the world and live in hotels and that can be a very lonely life. But I chose it. That song is not dealing with people who are living on their own in basement flats, or situations like that, it’s my living on my own. I mean, you can have a whole shoal of people looking after you, but in the end they all go away and you are in a hotel room on your own. I’m not complaining though. It’s a different kind of living on my own. People with my success can be lonely and can live on their own as well. I’m just saying that I’m living on my own and I’m having a boogie time! Does that make sense, honey?” 💛\n(Freddie Mercury) \n“Mercury’s solo song ‘Living On My Own’, originally released in 1985, but which reached number one in the UK two years after his death after getting a club-friendly remix, is a catchy expression of loneliness that paints Mercury as a bachelor, but not necessarily a ‘confirmed bachelor’ in the now somewhat dated euphemistic sense. He was so outrageously camp, it was almost like a double bluff.  Everything was about subtext with Freddie Mercury.” \n(Martin Aston, author of Breaking Down The Walls Of Heartache: How Music Came Out)\nOn 19 July 1993, Freddie earned a 𝗠𝗲𝗺𝗼𝗿𝗶𝗮𝗺 𝗜𝘃𝗼𝗿 𝗡𝗼𝘃𝗲𝗹𝗹𝗼 𝗔𝘄𝗮𝗿𝗱 for 'Living On My Own,’ No More Brothers Remix (this version hit #1)\nOur Brilliant Legend ⭐️👑",
+      "user_email": "banditaz@gmail.com",
+      "user_name": "banditaz",
+      "created_at": "2025-08-22T08:40:12.190Z"
+    }
+  ]
+}
