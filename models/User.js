@@ -17,19 +17,19 @@ const userSchema = new Schema(
         secret:       { type: String, trim: true },
 
         // nauji laukeliai Users page'ui
-        avatar_url:   { type: String, trim: true, default: "" },
-        phone:        { type: String, trim: true, default: "" },
+        avatar_url:   { type: String, trim: true, },
+        phone:        { type: String, trim: true, },
 
         // FINANSINIAI LAUKAI
         balance:      { type: Number, default: 1000 }, // € kaip Number (rodymui 2 sk.)
-        balanceUpdatedAt: { type: Date, default: null },
+        balanceUpdatedAt: { type: Date, default: 1000 },
 
         // Top-up žurnalas dienos limitui (1000 €/d.) tikrinti
         topups: {
             type: [{
                 amount:     { type: Number, required: true }, // € teigiama suma
                 created_at: { type: Date, default: Date.now },
-                note:       { type: String, trim: true, default: "" },
+                note:       { type: String, trim: true, },
             }],
             default: [],
             select: false, // nerodome pagal nutylėjimą
@@ -125,3 +125,4 @@ userSchema.set("toJSON", {
 });
 
 module.exports = model("User", userSchema);
+console.log(`[USER] loaded`);

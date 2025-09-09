@@ -1,54 +1,38 @@
 // routers/authRouter.js
-const express = require("express");
+const express = require('express');
 const router = express.Router();
+const auth = require('../middleware/auth'); // JWT middleware
+const User = require('../models/User');
 
-const authCtrl = require("../controllers/authController");
-const {
-    requireAuth,
-    validateRegister,
-    validateLogin,
-} = require("../middleware/authValidators");
-
-// Small helper for route logs
-function logRoute(req, _res, next) {
-    const auth = req.headers.authorization || req.headers.Authorization || "";
-    const hasBearer = auth.startsWith("Bearer ");
-    const tokenPreview = hasBearer ? auth.slice(7, 19) + "..." : "";
-    console.log(`[AUTH][ROUTE] ${req.method} ${req.originalUrl} auth=${hasBearer ? "Bearer " + tokenPreview : "no"}`);
-    next();
+// konvertuojam į saugų user objektą
+function toClient(u) {
+    return {
+        id: u._id,
+        username: u.username,
+        email: u.email,
+        phone: u.phone || "",
+        avatar: u.avatar || "",
+        balance: Number(u.balance ?? u.money ?? 0),
+        role: u.role || "user",
+    };
 }
 
-// CORS preflight (Express 5: naudok RegExp, ne "(.*)")
-router.options(/.*/, (req, res) => {
-    console.log("[AUTH][ROUTE] OPTIONS preflight for", req.originalUrl);
-    res.sendStatus(204);
+// GET /api/auth/me  -> reikia Bearer token
+router.get('/me', auth, async (req, res) => {
+    const u = await User.findById(req.user.id);
+    if (!u) return res.status(404).json({ error: 'User not found' });
+    res.json({ user: toClient(u) });
 });
 
-// Health
-router.get("/health", (req, res) => {
-    console.log("[AUTH][ROUTE] GET /health");
-    res.json({ ok: true, scope: "auth" });
-});
+// PATCH /api/auth/me -> atnaujint leidžiam tik šiuos laukus
+router.patch('/me', auth, async (req, res) => {
+    const allow = ['username', 'email', 'phone', 'avatar', 'money', 'balance'];
+    const patch = {};
+    for (const k of allow) if (req.body[k] !== undefined) patch[k] = req.body[k];
 
-// REGISTER
-// body: { email, passwordOne, passwordTwo }
-router.post("/register", logRoute, validateRegister, authCtrl.register);
-
-// LOGIN
-// body: { email (arba userName), password }
-router.post("/login", logRoute, validateLogin, authCtrl.login);
-
-// ME (requires JWT)
-router.get("/me", logRoute, requireAuth, authCtrl.me);
-
-// TOP-UP (requires JWT)
-// body: { amount, note? }  — 1000 €/d. limitas (admin apeina)
-router.post("/topup", logRoute, requireAuth, authCtrl.topup);
-
-// Fallback šitam routeriui (Express 5 patikimiau su router.use)
-router.use((req, res) => {
-    console.warn(`[AUTH][ROUTE][404] ${req.method} ${req.originalUrl}`);
-    res.status(404).json({ success: false, message: "Unknown auth route" });
+    const u = await User.findByIdAndUpdate(req.user.id, patch, { new: true });
+    if (!u) return res.status(404).json({ error: 'User not found' });
+    res.json({ user: toClient(u) });
 });
 
 module.exports = router;
